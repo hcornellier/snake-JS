@@ -1,25 +1,24 @@
 body {
-    background: #474242;
+  /* background: #474242; */
 }
 
 #game-wrap {
-    height: 800px;
-    width: 1100px;
-    background: lightgrey;
-    display: flex;
-    align-items: flex-end;
+  position: relative;
+  height: 210px;
+  width: 210px;
+  background: lightgrey;
 }
 
 .player {
-    position: relative;
-    width: 10px;
-    height: 10px;
-    background: black;
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: black;
 }
 
 .coin {
-    position: relative;
-    width: 10px;
-    height: 10px;
-    background: #d9770f;
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #d9770f;
 }
