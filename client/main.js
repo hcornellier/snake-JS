@@ -3,8 +3,10 @@ let direction = "right"
 let snakeLength = 0;
 let coinCount = 0;
 let coinExists = false;
-let coinPosLeft = getRandomInt(500);
-let coinPosBottom = getRandomInt(500);
+let GAME_HEIGHT = 800;
+let GAME_WIDTH = 1000;
+let coinPosLeft = getRandomCoinPositionLeft();
+let coinPosBottom = getRandomCoinPositionBottom();
 
 // Start movement
 let interval = setInterval(() =>
@@ -76,13 +78,23 @@ playerArr[2] = new Player(false, 40, 300, direction);
 c0 = new Coin(coinPosLeft, coinPosBottom);
 coinExists = true;
 
-function getRandomInt(max) {
+function getRandomInt(max)
+{
     return Math.floor(Math.random() * max);
+}
+
+function getRandomCoinPositionLeft()
+{
+    return (14 * getRandomInt (GAME_WIDTH / 14)) - 4;
+}
+
+function getRandomCoinPositionBottom()
+{
+    return (14 * getRandomInt (GAME_HEIGHT / 14)) + 6;
 }
 
 function changeDirection(interval, direction)
 {
-    console.log("Changing direction to " + direction);
     playerArr[0].direction = direction;
     clearInterval(interval);
     move(direction, playerArr[0]);
@@ -102,7 +114,6 @@ function move(direction, currPlayer)
     let nextPlayer = "";
     playerID = "player-" + currPlayer.id;
     nextPlayer = playerArr[currPlayer.id + 1];
-    console.log("Moved " + playerID + " " + direction);
     let dir = "left";
     if (direction === 'up' || direction === 'down')
         dir = "bottom";
@@ -129,21 +140,30 @@ function move(direction, currPlayer)
         }
 
         // Check for coins
-        if (coinExists)
-        {
-            const head = document.getElementById("player-0");
-            let headLeftPos = parseInt(head.style.left);
-            let headBottomPos = parseInt(head.style.bottom);
-            if (Math.abs(headLeftPos - coinPosLeft) < 10 && Math.abs(headBottomPos - coinPosBottom) < 10)
-            {
-                const coin = document.getElementById("coin");
-                coin.remove();
-                coinPosLeft = getRandomInt(500);
-                coinPosBottom = getRandomInt(500);
-                c0 = new Coin(coinPosLeft, coinPosBottom);
-                playerArr[snakeLength] = new Player(false, parseInt(playerArr[snakeLength-1].left) - 4, parseInt(playerArr[snakeLength-1].bottom), currPlayer.lastMove);
-            }
-        }
+        collisionDetection(currPlayer)
+    }
+}
 
+function collisionDetection(currPlayer)
+{
+    const head = document.getElementById("player-0");
+    let headLeftPos = parseInt(head.style.left);
+    let headBottomPos = parseInt(head.style.bottom);
+    let horizDistanceToCoin = Math.abs(headLeftPos - coinPosLeft);
+    let vertiDistanceToCoin = Math.abs(headBottomPos - coinPosBottom);
+
+    // Snake head has collided with coin
+    if (horizDistanceToCoin === 10 && vertiDistanceToCoin === 0)
+    {
+        const coin = document.getElementById("coin");
+        coin.remove();
+        coinPosLeft = getRandomCoinPositionLeft();
+        coinPosBottom = getRandomCoinPositionBottom();
+        c0 = new Coin(coinPosLeft, coinPosBottom);
+        playerArr[snakeLength] = new Player(false, parseInt(playerArr[snakeLength-1].left) - 4, parseInt(playerArr[snakeLength-1].bottom), currPlayer.lastMove);
+        const score = document.getElementById("score");
+        let currScore = score.innerText;
+        currScore++;
+        score.innerText = currScore;
     }
 }
