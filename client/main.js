@@ -10,7 +10,7 @@ let coinPosBottom = getRandomInt(500);
 let interval = setInterval(() =>
 {
     move(direction, playerArr[0]);
-}, 1000);
+}, 500);
 
 document.onkeydown = checkKey;
 function checkKey(e)
@@ -89,7 +89,7 @@ function changeDirection(interval, direction)
     interval = setInterval(() =>
     {
         move(direction, playerArr[0]);
-    }, 1000);
+    }, 500);
     return interval;
 }
 
