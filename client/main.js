@@ -1,19 +1,18 @@
-// Initial direction: right
-let direction = "right"
+// Initialize
+let direction   = "right"
 let snakeLength = 0;
-let coinCount = 0;
-let coinExists = false;
 let GAME_HEIGHT = 800;
-let GAME_WIDTH = 1000;
-let coinPosLeft = getRandomCoinPositionLeft();
-let coinPosBottom = getRandomCoinPositionBottom();
+let GAME_WIDTH  = 1000;
+let DISTANCE_MOVED = 14;
+let coinPosLeft    = getRandomCoinPositionLeft();
+let coinPosBottom  = getRandomCoinPositionBottom();
 
 // Start movement
-let interval = setInterval(() =>
-{
+let interval = setInterval(() => {
     move(direction, playerArr[0]);
 }, 500);
 
+// Detect keypress
 document.onkeydown = checkKey;
 function checkKey(e)
 {
@@ -43,40 +42,37 @@ function checkKey(e)
 
 class Player
 {
-    constructor(head, left, bottom, prev, direction)
-    {
+    constructor(head, left, bottom) {
         this.head = head;
         this.left = left;
         this.bottom = bottom;
         this.direction = "right";
-        this.lastMove = "NULL";
+        this.lastMove = "";
         this.id = snakeLength;
         this.next = "player-" + (snakeLength + 1);
-        console.log(this.next);
 
-        let e = document.createElement("div");
-        document.getElementById('game-wrap').insertAdjacentHTML('afterbegin', '<div id="player-' + snakeLength++ + '" class="player" style="left: ' + left + 'px; bottom: ' + bottom + 'px; "> </div>');
+        // Add new block to the map
+        let block = '<div id="player-' + snakeLength++ + '" class="player" style="left: ' + left + 'px; bottom: ' + bottom + 'px; "> </div>';
+        document.getElementById('game-wrap').insertAdjacentHTML('afterbegin', block);
     }
 }
 
 class Coin
 {
-    constructor(left, bottom)
-    {
+    constructor(left, bottom) {
         this.left = left;
         this.bottom = bottom;
-        let e = document.createElement("div");
-        document.getElementById('game-wrap').insertAdjacentHTML('beforeend', '<div id="coin" class="coin" style="left: ' + left + 'px; bottom: ' + bottom + 'px; "> </div>');
+        let coinHTML = '<div id="coin" class="coin" style="left: ' + left + 'px; bottom: ' + bottom + 'px; "> </div>';
+        document.getElementById('game-wrap').insertAdjacentHTML('beforeend', coinHTML);
     }
 }
 
+// Initialize snake & first coin
 const playerArr = [];
-playerArr[0] = new Player(true, 48, 300, direction);
-playerArr[1] = new Player(false, 44, 300, direction);
-playerArr[2] = new Player(false, 40, 300, direction);
-
+playerArr[0] = new Player(true, 48, 300);
+playerArr[1] = new Player(false, 44, 300);
+playerArr[2] = new Player(false, 40, 300);
 c0 = new Coin(coinPosLeft, coinPosBottom);
-coinExists = true;
 
 function getRandomInt(max)
 {
@@ -107,27 +103,24 @@ function changeDirection(interval, direction)
 
 function move(direction, currPlayer)
 {
-    let DISTANCE_MOVED = 14;
-    let pos = "";
-    let playerID = "";
-    let prevPlayer = "";
-    let nextPlayer = "";
-    playerID = "player-" + currPlayer.id;
-    nextPlayer = playerArr[currPlayer.id + 1];
-    let dir = "left";
-    if (direction === 'up' || direction === 'down')
-        dir = "bottom";
+    let playerID = "player-" + currPlayer.id;
     if (document.getElementById(playerID))
     {
+        let nextPlayer = playerArr[currPlayer.id + 1];
+        let dir = "left";
+        if (direction === 'up' || direction === 'down')
+            dir = "bottom";
         const player = document.getElementById(playerID);
-        pos = parseInt(player.style[dir]);
+        let pos = parseInt(player.style[dir]);
 
+        // If snake moves right or up, distance must be added. ELse, distance must be removed
         if (direction === 'right' || direction === 'up')
             pos = pos + DISTANCE_MOVED;
         else
             pos = pos - DISTANCE_MOVED;
         player.style[dir] = pos + "px";
 
+        // Update position info on each block - used to detect collisions
         currPlayer.left = player.style.left;
         currPlayer.bottom = player.style.bottom;
 
@@ -144,26 +137,28 @@ function move(direction, currPlayer)
     }
 }
 
+// Detects collisions between the snake coin & coins or the tail.
 function collisionDetection(currPlayer)
 {
     const head = document.getElementById("player-0");
-    let headLeftPos = parseInt(head.style.left);
-    let headBottomPos = parseInt(head.style.bottom);
-    let horizDistanceToCoin = Math.abs(headLeftPos - coinPosLeft);
-    let vertiDistanceToCoin = Math.abs(headBottomPos - coinPosBottom);
 
-    // Snake head has collided with coin
-    if (horizDistanceToCoin === 10 && vertiDistanceToCoin === 0)
+    // Snake head collides with coin
+    if (Math.abs(parseInt(head.style.left) - coinPosLeft) === 10 && Math.abs(parseInt(head.style.bottom) - coinPosBottom) === 0)
     {
-        const coin = document.getElementById("coin");
-        coin.remove();
+        // Remove existing coin from map
+        document.getElementById("coin").remove();
+
+        // Reset global coinpos variables, initialize new coin on map
         coinPosLeft = getRandomCoinPositionLeft();
         coinPosBottom = getRandomCoinPositionBottom();
         c0 = new Coin(coinPosLeft, coinPosBottom);
+
+        // Add extra block to the snake
         playerArr[snakeLength] = new Player(false, parseInt(playerArr[snakeLength-1].left) - 4, parseInt(playerArr[snakeLength-1].bottom), currPlayer.lastMove);
+
+        // Add +1 to the score
         const score = document.getElementById("score");
         let currScore = score.innerText;
-        currScore++;
-        score.innerText = currScore;
+        score.innerText = ++currScore;
     }
 }
