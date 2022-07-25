@@ -61,6 +61,12 @@ function addToTail(left, bottom) {
     };
 }
 
+function collidesWithCoin(e)
+{
+    let result = Math.abs(parseInt(e.left) - coinPosLeft) < tileSize && Math.abs(parseInt(e.bottom) - coinPosBottom) < tileSize;
+    return result;
+}
+
 function makeNewCoin() {
     // Select random tile for coin until finding one that is unoccupied
     while (true) {
@@ -69,18 +75,11 @@ function makeNewCoin() {
         coinPosLeft = getRandomCoinPositionLeft();
         coinPosBottom = getRandomCoinPositionBottom();
         playerArr.forEach(e => {
-            if (
-                Math.abs(parseInt(e.left) - coinPosLeft) < tileSize &&
-                Math.abs(parseInt(e.bottom) - coinPosBottom) < tileSize
-            ) {
-                occupied = true;
-            }
+            if (collidesWithCoin(e)) coccupied = true;
         });
         // If the coin isn't on the snake, we have successfully
         // found an unoccupied square, so we break and continue.
-        if (!occupied) {
-            break;
-        }
+        if (!occupied) break;
         // Otherwise, continue loop and pick a new random tile for the coin.
     }
 
@@ -151,10 +150,7 @@ function collisionDetection(currPlayer) {
     const head = playerArr[0];
 
     // Snake head collides with coin
-    if (
-        Math.abs(parseInt(head.left) - coinPosLeft) < tileSize &&
-        Math.abs(parseInt(head.bottom) - coinPosBottom) < tileSize
-    ) {
+    if (collidesWithCoin(head)) {
         // Remove existing coin from map
         document.getElementById("coin").remove();
 
@@ -176,7 +172,6 @@ function collisionDetection(currPlayer) {
     // Snake head collides with tail
     if (currPlayer.id === 0) {
         for (let i = 1; i < playerArr.length; i++) {
-            const head = playerArr[0];
             const currTailBlock = playerArr[i];
             if (
                 head.left === currTailBlock.left &&
