@@ -62,11 +62,12 @@ function addToTail(left, bottom) {
 }
 
 function makeNewCoin() {
-    while (true)
-    {
+    // Select random tile for coin until finding one that is unoccupied
+    while (true) {
+        // Assume that the coin's tile is unoccupied
+        let occupied = false;
         coinPosLeft = getRandomCoinPositionLeft();
         coinPosBottom = getRandomCoinPositionBottom();
-        let occupied = false; // Assume that the coin's tile is unoccupied
         playerArr.forEach(e => {
             if (
                 Math.abs(parseInt(e.left) - coinPosLeft) < tileSize &&
@@ -75,9 +76,12 @@ function makeNewCoin() {
                 occupied = true;
             }
         });
+        // If the coin isn't on the snake, we have successfully
+        // found an unoccupied square, so we break and continue.
         if (!occupied) {
             break;
         }
+        // Otherwise, continue loop and pick a new random tile for the coin.
     }
 
     let coinHTML =
