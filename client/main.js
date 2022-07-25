@@ -62,28 +62,23 @@ function addToTail(left, bottom) {
 }
 
 function makeNewCoin() {
-    // Assume that the initially random spot is unoccupied
-    let cont = true;
     while (true)
     {
         coinPosLeft = getRandomCoinPositionLeft();
         coinPosBottom = getRandomCoinPositionBottom();
         let occupied = false; // Assume that the coin's tile is unoccupied
-        console.log("Attempting to place a coin at: (" + coinPosLeft + ", " + coinPosBottom + ")");
         playerArr.forEach(e => {
             if (
                 Math.abs(parseInt(e.left) - coinPosLeft) < tileSize &&
                 Math.abs(parseInt(e.bottom) - coinPosBottom) < tileSize
             ) {
                 occupied = true;
-                console.log('This square is occupied');
             }
         });
         if (!occupied) {
             break;
         }
     }
-    console.log("Un-occupied spot found. Placing coin...")
 
     let coinHTML =
         '<div id="coin" class="coin" style="left: ' +
