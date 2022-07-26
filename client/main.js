@@ -6,36 +6,21 @@ const gameDimensions = tileSize * tilesInGame;
 const getRandomInt = (max) => Math.floor(Math.random() * max);
 const getRandomCoinPositionLeft = () => tileSize * getRandomInt(tilesInGame);
 const getRandomCoinPositionBottom = () => tileSize * getRandomInt(tilesInGame);
+const movingVertically = () => {
+    return direction === "up" || direction === "down"
+};
+const movingHorizontally = () => {
+    return direction === "left" || direction === "right"
+};
+const coinCollision = (e) => {
+    return Math.abs(parseInt(e.left) - coinPosLeft) < tileSize && Math.abs(parseInt(e.bottom) - coinPosBottom) < tileSize
+};
 
 // Initialize
 let playerArr = [];
 let direction = "right";
 let coinPosLeft = getRandomCoinPositionLeft();
 let coinPosBottom = getRandomCoinPositionBottom();
-
-function checkKey(e) {
-    let dirChanged = false;
-    if (e.keyCode === 39 && direction !== "right" && direction !== "left") {
-        direction = "right";
-        dirChanged = true;
-    }
-    if (e.keyCode === 37 && direction !== "left" && direction !== "right") {
-        direction = "left";
-        dirChanged = true;
-    }
-    if (e.keyCode === 38 && direction !== "up" && direction !== "down") {
-        direction = "up";
-        dirChanged = true;
-    }
-    if (e.keyCode === 40 && direction !== "down" && direction !== "up") {
-        direction = "down";
-        dirChanged = true;
-    }
-
-    if (dirChanged) {
-        interval = changeDirection(interval, direction);
-    }
-}
 
 function addToTail(left, bottom) {
     const id = playerArr.length;
@@ -61,21 +46,15 @@ function addToTail(left, bottom) {
     };
 }
 
-function collidesWithCoin(e)
-{
-    let result = Math.abs(parseInt(e.left) - coinPosLeft) < tileSize && Math.abs(parseInt(e.bottom) - coinPosBottom) < tileSize;
-    return result;
-}
-
 function makeNewCoin() {
-    // Select random tile for coin until finding one that is unoccupied
+    // Select random tile until finding one that is unoccupied
     while (true) {
         // Assume that the coin's tile is unoccupied
         let occupied = false;
         coinPosLeft = getRandomCoinPositionLeft();
         coinPosBottom = getRandomCoinPositionBottom();
         playerArr.forEach(e => {
-            if (collidesWithCoin(e)) coccupied = true;
+            if (coinCollision(e)) occupied = true;
         });
         // If the coin isn't on the snake, we have successfully
         // found an unoccupied square, so we break and continue.
@@ -96,13 +75,14 @@ function makeNewCoin() {
 }
 
 function changeDirection(interval, direction) {
-    playerArr[0].direction = direction;
-    move(direction, playerArr[0]);
+    move(playerArr[0].direction = direction, playerArr[0]);
 
     clearInterval(interval);
-    interval = setInterval(() => {
-        move(direction, playerArr[0]);
-    }, 500);
+    if (document.getElementById("player-0")) {
+        interval = setInterval(() => {
+            move(direction, playerArr[0]);
+        }, 500);
+    }
 
     return interval;
 }
@@ -110,17 +90,14 @@ function changeDirection(interval, direction) {
 function move(direction, currPlayer) {
     let playerID = "player-" + currPlayer.id;
 
-    if (!document.getElementById(playerID)) {
-        console.error(`could not find playerID ${playerID}`);
-        return;
-    }
+    if (!document.getElementById(playerID)) return;
 
     const dir = direction === "up" || direction === "down" ? "bottom" : "left";
 
     const player = document.getElementById(playerID);
     let pos = parseInt(player.style[dir]);
 
-    // If snake moves right or up, distance must be added. ELse, distance must be removed
+    // If snake moves right or up, distance must be added. Else, distance must be removed
     if (direction === "right" || direction === "up") pos += tileSize;
     else pos -= tileSize;
 
@@ -141,7 +118,6 @@ function move(direction, currPlayer) {
         nextPlayer.direction = currPlayer.lastMove;
     }
 
-    // Check for coins
     collisionDetection(currPlayer);
 }
 
@@ -150,7 +126,7 @@ function collisionDetection(currPlayer) {
     const head = playerArr[0];
 
     // Snake head collides with coin
-    if (collidesWithCoin(head)) {
+    if (coinCollision(head)) {
         // Remove existing coin from map
         document.getElementById("coin").remove();
 
@@ -185,15 +161,30 @@ function collisionDetection(currPlayer) {
 
 function endGame ()
 {
+    // Remove coin and player from game
     document.getElementById("coin").remove();
     playerArr.forEach(e => {
-        let player = document.getElementById("player-" + e.id)
-        if (player) player.remove();
+        document.getElementById("player-" + e.id).remove();
     });
-    console.log("Game over...");
-    document.getElementById("gameover").style.visibility = "visible";
 
+    // Display "GAME OVER"
+    document.getElementById("gameover").style.visibility = "visible";
     return;
+}
+
+function checkKey(e) {
+    if (movingVertically()) {
+        if (e.keyCode === 39)
+            interval = changeDirection(interval, direction = "right");
+        if (e.keyCode === 37)
+            interval = changeDirection(interval, direction = "left");
+    }
+    if (movingHorizontally()) {
+        if (e.keyCode === 38)
+            interval = changeDirection(interval, direction = "up");
+        if (e.keyCode === 40)
+            interval = changeDirection(interval, direction = "down");
+    }
 }
 
 // Initialize snake & first coin
